@@ -10,7 +10,17 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+
+    <!-- Message Prompts -->
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="location_permission_prompt">"Turn on Location to use eWitness".</string>
+
+
+    <string name="title_activity_maps">Maps</string>
+    <!-- Button Texts -->
+    <string name="btnMapsText">Map</string>
+    <string name="btnSatelliteText">Satellite</string>
+    <string name="btnHybridText">Hybrid</string>
 </resources>
