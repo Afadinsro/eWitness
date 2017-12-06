@@ -1,7 +1,7 @@
 package com.adino.ewitness;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 public class TakeShotActivity extends AppCompatActivity {
 

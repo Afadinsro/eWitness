@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity
         viewPager = (ViewPager) findViewById(R.id.vp_image_slider);
         viewPagerAdapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(viewPagerAdapter);
-
+        // Add timer to image slider
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new ImageSliderTimer(), 2000, 6000);
 
