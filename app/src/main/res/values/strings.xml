@@ -1,5 +1,26 @@
 <resources>
+    <!-- Activity Titles -->
     <string name="app_name">eWitness</string>
+    <string name="activity_title_profile">About Me</string>
+    <string name="activity_title_home">Home</string>
+    <string name="activity_title_messages">Messages</string>
+    <string name="activity_title_reports">Reports</string>
+
+    <!-- Side Nav Menus -->
+    <string name="nav_home">Home</string>
+    <string name="nav_reports">Reports</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_messages">Messages</string>
+
+    <!-- Menu Texts -->
+    <string name="action_sign_out">Sign Out</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Activity Views -->
+    <string name="a">Sign Out</string>
+
+    <!-- Content Description -->
+    <string name="image_view_content_description">Slides for homepage</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -23,4 +44,8 @@
     <string name="btnMapsText">Map</string>
     <string name="btnSatelliteText">Satellite</string>
     <string name="btnHybridText">Hybrid</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
 </resources>
