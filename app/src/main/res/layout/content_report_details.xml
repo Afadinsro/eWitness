@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.adino.ewitness.ReportDetailsActivity"
+    tools:showIn="@layout/activity_report_details">
+
+    <ImageView
+        android:id="@+id/image_view_report_image"
+        android:layout_width="307dp"
+        android:layout_height="182dp"
+        android:layout_marginTop="70dp"
+        android:contentDescription="@string/image_view_content_description"
+        app:layout_constraintBottom_toTopOf="@+id/txtCaption"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@mipmap/ic_daddy" />
+
+    <TextView
+        android:id="@+id/lblCaption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="35dp"
+        android:labelFor="@id/txtCaption"
+        android:text="@string/lbl_caption"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/txtCaption"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/image_view_report_image"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/lblCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:labelFor="@id/txtCaption"
+        android:text="@string/lbl_category"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtCaption"
+        app:layout_constraintVertical_bias="0.085" />
+
+    <EditText
+        android:id="@+id/txtCaption"
+        style="@android:style/Widget.Material.EditText"
+        android:layout_width="272dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="248dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/lblCaption"
+        app:layout_constraintTop_toBottomOf="@+id/image_view_report_image" />
+
+
+    <ToggleButton
+        android:id="@+id/tbtn_category_theft"
+        android:layout_width="@dimen/tbtn_category_width"
+        android:layout_height="@dimen/tbtn_category_height"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_theft_unchecked"
+        android:textOff="@string/tbtn_text_off"
+        android:textOn="@string/tbtn_text_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.709"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtCaption"
+        app:layout_constraintVertical_bias="0.088" />
+
+    <ToggleButton
+        android:id="@+id/tbtn_category_sanitation"
+        android:layout_width="@dimen/tbtn_category_width"
+        android:layout_height="@dimen/tbtn_category_height"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_sanitation_unchecked"
+        android:textOff="@string/tbtn_text_off"
+        android:textOn="@string/tbtn_text_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.563"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtCaption"
+        app:layout_constraintVertical_bias="0.088" />
+
+    <ToggleButton
+        android:id="@+id/tbtn_category_social"
+        android:layout_width="@dimen/tbtn_category_width"
+        android:layout_height="@dimen/tbtn_category_height"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_social_unchecked"
+        android:textOff="@string/tbtn_text_off"
+        android:textOn="@string/tbtn_text_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.447"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtCaption"
+        app:layout_constraintVertical_bias="0.088" />
+
+    <ToggleButton
+        android:id="@+id/tbtn_category_education"
+        android:layout_width="@dimen/tbtn_category_width"
+        android:layout_height="@dimen/tbtn_category_height"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_education_unchecked"
+        android:textOff="@string/tbtn_text_off"
+        android:textOn="@string/tbtn_text_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.055"
+        app:layout_constraintStart_toEndOf="@+id/tbtn_category_theft"
+        app:layout_constraintTop_toBottomOf="@+id/txtCaption"
+        app:layout_constraintVertical_bias="0.088" />
+
+    <ToggleButton
+        android:id="@+id/tbtn_category_auto"
+        android:layout_width="@dimen/tbtn_category_width"
+        android:layout_height="@dimen/tbtn_category_height"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_auto_unchecked"
+        android:textOff="@string/tbtn_text_off"
+        android:textOn="@string/tbtn_text_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.311"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtCaption"
+        app:layout_constraintVertical_bias="0.088" />
+</android.support.constraint.ConstraintLayout>

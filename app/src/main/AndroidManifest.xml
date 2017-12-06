@@ -23,15 +23,10 @@
         android:required="true" />
     <uses-feature android:name="android.hardware.location.gps" />
 
-
-
     <!-- Google Play services -->
     <meta-data
         android:name="com.google.android.gms.version"
         android:value="@integer/google_play_services_version" />
-
-
-
 
     <application
         android:allowBackup="true"
@@ -52,10 +47,18 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
 
+        <activity
+            android:name=".ReportDetailsActivity"
+            android:label="@string/title_activity_report_details"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="com.adino.ewitness.ReportDetailsActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
     </application>
 

@@ -16,6 +16,18 @@
     <string name="action_sign_out">Sign Out</string>
     <string name="action_settings">Settings</string>
 
+    <!-- Buttons -->
+    <string name="tbtn_text_off"></string>
+    <string name="tbtn_text_on"></string>
+
+    <!-- Text fields Texts -->
+    <string name="txt_caption">Caption</string>
+
+    <!-- Labels -->
+    <string name="lbl_caption">Caption:</string>
+    <string name="lbl_category">Category:</string>
+    <string name="lbl_default">Label:</string>
+
     <!-- Activity Views -->
     <string name="a">Sign Out</string>
 
@@ -49,5 +61,6 @@
     <string name="image_view_content_description">Slider image</string>
     <string name="title_activity_tabbed">TabbedActivity</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="title_activity_report_details">Report Details</string>
 
 </resources>
