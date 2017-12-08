@@ -1,6 +1,7 @@
 package com.adino.ewitness;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -20,7 +21,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+
+import java.io.ByteArrayOutputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,44 +37,25 @@ public class MainActivity extends AppCompatActivity
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private  static final String TAG = "MainActivity:";
+    private static final String TAG = "MainActivity";
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private static final int ERROR_DIALOG_REQUEST = 9001;
+
+    //vars
+    private boolean mLocationPermissionsGranted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        viewPager = (ViewPager) findViewById(R.id.vp_image_slider);
-        viewPagerAdapter = new ViewPagerAdapter(this);
-        viewPager.setAdapter(viewPagerAdapter);
+        if(isGoogleServicesOK()) {
+            init();
+        }
 
-        // Add timer to image slider
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new ImageSliderTimer(), 2000, 6000);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*Intent cameraIntent = new Intent();
-                cameraIntent.setClass(MainActivity.this, CameraActivity.class);
-                startActivity(cameraIntent);*/
-                if(isPermissionGrantedForCamera()) {
-                    dispatchCameraIntent();
-                }
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
@@ -125,10 +113,17 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
-            Log.v(TAG,"Permission: "+permissions[0]+ "was "+grantResults[0]);
-            //resume tasks needing this permission
+        switch (requestCode){
+            case LOCATION_PERMISSION_REQUEST_CODE:
+                if(grantResults.length > 0){
+                    for(int g: grantResults) {
+                        if (g != PackageManager.PERMISSION_GRANTED) {
+                            mLocationPermissionsGranted = true;
+                            return;
+                        }
+                    }
+                    mLocationPermissionsGranted = false;
+                }
         }
     }
 
@@ -138,6 +133,13 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+            Intent goToAddDetailsIntent = new Intent(MainActivity.this, ReportDetailsActivity.class);
+            goToAddDetailsIntent.putExtra("image",byteArray);
+            startActivity(goToAddDetailsIntent);
             //mImageView.setImageBitmap(imageBitmap);
         }
 
@@ -168,6 +170,68 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
     }
+
+    private void init(){
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        viewPager = (ViewPager) findViewById(R.id.vp_image_slider);
+        viewPagerAdapter = new ViewPagerAdapter(this);
+        viewPager.setAdapter(viewPagerAdapter);
+
+        // Add timer to image slider
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new ImageSliderTimer(), 2000, 6000);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /*Intent cameraIntent = new Intent();
+                cameraIntent.setClass(MainActivity.this, CameraActivity.class);
+                startActivity(cameraIntent);*/
+                if(isPermissionGrantedForCamera()) {
+                    dispatchCameraIntent();
+                }
+            }
+        });
+
+        Button btnNext = (Button)findViewById(R.id.btn_go_to_details);
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent detailsIntent = new Intent(MainActivity.this, ReportDetailsActivity.class);
+                startActivity(detailsIntent);
+            }
+        });
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private boolean isGoogleServicesOK(){
+        Log.d(TAG, "isGoogleServicesOK: checking Google Play Services version");
+        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
+        if(available == ConnectionResult.SUCCESS){
+            Log.d(TAG, "isGoogleServicesOK: Google Play services is OK");
+            Toast.makeText(this, "Google Play services is OK", Toast.LENGTH_SHORT).show();
+            return true;
+        }else if(GoogleApiAvailability.getInstance().isUserResolvableError(available)){
+            Log.d(TAG, "isGoogleServicesOK: An error occured but we can fix it");
+            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
+            dialog.show();
+        }else{
+            Toast.makeText(this, "You can't make map requests.", Toast.LENGTH_SHORT).show();
+        }
+        return false;
+    }
+
 
     /******************************IMAGE SLIDER TIMER*************************************/
     /**

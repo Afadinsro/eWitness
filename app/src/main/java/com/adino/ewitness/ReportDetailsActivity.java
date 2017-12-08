@@ -1,7 +1,13 @@
 package com.adino.ewitness;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -9,32 +15,35 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.SupportMapFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class ReportDetailsActivity extends AppCompatActivity implements OnMapReadyCallback{
-    private GoogleMap map;
+public class ReportDetailsActivity extends AppCompatActivity implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback{
+    private GoogleMap mMap;
     private ToggleButton tbtnAuto;
     private ToggleButton tbtnTheft;
     private ToggleButton tbtnSanitation;
     private ToggleButton tbtnSocial;
     private ToggleButton tbtnEducation;
     private LayoutInflater layoutInflater;
+    private ImageView imageView;
     private boolean mapReady = false;
-    private  static final String TAG = "ReportDetailsActivity";
+    private static final String TAG = "ReportDetailsActivity";
+    private static final int ERROR_DIALOG_REQUEST = 9001;
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
-
+    private boolean mLocationPermissionsGranted = false;
 
 
     @Override
@@ -44,10 +53,7 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-        /*final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.fragment_map);
-        mapFragment.getMapAsync(this);*/
+        getLocationPermission();
 
         tbtnAuto = (ToggleButton)findViewById(R.id.tbtn_category_auto);
         tbtnTheft = (ToggleButton)findViewById(R.id.tbtn_category_theft);
@@ -63,6 +69,11 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
                         .setAction("Action", null).show();
             }
         });
+
+        ImageView imageView = (ImageView) findViewById(R.id.image_view_report_image);
+        byte[] byteArray = getIntent().getByteArrayExtra("image");
+        Bitmap imageBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+        imageView.setImageBitmap(imageBitmap);
 
         // Get current date
         Calendar c = Calendar.getInstance();
@@ -85,13 +96,56 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
         mapReady = true;
-        init(googleMap);
+        Toast.makeText(this, "Map is ready", Toast.LENGTH_SHORT).show();
+
     }
 
-    public void init(GoogleMap googleMap){
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        mLocationPermissionsGranted = false;
+        switch (requestCode){
+            case LOCATION_PERMISSION_REQUEST_CODE:
+                if(grantResults.length > 0){
+                    for(int g: grantResults) {
+                        if (g != PackageManager.PERMISSION_GRANTED) {
+                            mLocationPermissionsGranted = false;
+                            Log.d(TAG, "onRequestPermissionsResult: Permission failed");
+                            return;
+                        }
+                    }
+                    Log.d(TAG, "onRequestPermissionsResult: Permission granted");
+                    mLocationPermissionsGranted = true;
+                }
+        }
+    }
 
-        map = googleMap;
+    private void getLocationPermission(){
+        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION};
+        if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED){
+            if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                    COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                mLocationPermissionsGranted = true;
+                //initMap();
+            }else{
+                ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+
+            }
+        }else{
+            ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+
+        }
+    }
+
+    public void initMap(){
+        SupportMapFragment supportMapFragment = (SupportMapFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_map);
+        supportMapFragment.getMapAsync(ReportDetailsActivity.this);
+
+        /*map = googleMap;
         map.setBuildingsEnabled(true);
         // Add a marker in Gbawe and move the camera
         LatLng home = new LatLng(5.582830, -0.307473);
@@ -111,9 +165,11 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
 
         /*map.moveCamera(CameraUpdateFactory.newLatLng(home));
         map.animateCamera(CameraUpdateFactory.zoomTo(13));*/
+
     }
 
     private void toggleAllOthers(ToggleButton selected){
+        Log.d(TAG, "toggleAllOthers: called");
         ToggleButton[] toggleButtons = {tbtnAuto, tbtnTheft, tbtnSanitation, tbtnSocial, tbtnEducation};
         for(ToggleButton tbtn: toggleButtons){
             if(tbtn != selected){
