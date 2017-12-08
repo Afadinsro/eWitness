@@ -19,14 +19,16 @@
     <!-- Buttons -->
     <string name="tbtn_text_off"></string>
     <string name="tbtn_text_on"></string>
+    <string name="btn_submit_report">Submit</string>
 
     <!-- Text fields Texts -->
-    <string name="txt_caption">Caption</string>
+    <string name="txt_caption">Write a caption&#8230;</string>
 
     <!-- Labels -->
     <string name="lbl_caption">Caption:</string>
     <string name="lbl_category">Category:</string>
     <string name="lbl_default">Label:</string>
+    <string name="lbl_location">Location:</string>
 
     <!-- Activity Views -->
     <string name="a">Sign Out</string>

@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.adino.ewitness.ReportDetailsActivity">
 
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -25,26 +26,22 @@
     </android.support.design.widget.AppBarLayout>
 
     <include
+        android:id="@+id/include"
         layout="@layout/content_report_details"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="564dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_submit_report"
-        android:layout_width="@dimen/fab_width"
-        android:layout_height="@dimen/fab_height"
-        android:layout_gravity="bottom|center"
-        android:layout_margin="@dimen/fab_margin"
-        android:layout_weight="1"
-        app:fabSize="normal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/appBarLayout"
-        app:layout_constraintHorizontal_bias="0.526"
-        app:layout_constraintStart_toEndOf="@+id/appBarLayout"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+    <Button
+        android:id="@+id/btn_submit_report"
+        style="@android:style/Widget.Material.Light.Button"
+        android:layout_width="@dimen/btn_submit_report_width"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_submit_report"
+        app:layout_anchor="@+id/include"
+        app:layout_anchorGravity="bottom|center" />
 
 </android.support.design.widget.CoordinatorLayout>

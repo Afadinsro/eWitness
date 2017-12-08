@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private  static final String TAG = "";
+    private  static final String TAG = "MainActivity:";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity
         viewPager = (ViewPager) findViewById(R.id.vp_image_slider);
         viewPagerAdapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(viewPagerAdapter);
+
         // Add timer to image slider
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new ImageSliderTimer(), 2000, 6000);
@@ -98,6 +99,7 @@ public class MainActivity extends AppCompatActivity
             return true;
         }else
         if (id == R.id.action_sign_out) {
+
             return true;
         }
 
