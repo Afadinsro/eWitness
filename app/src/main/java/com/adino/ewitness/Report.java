@@ -9,16 +9,13 @@ public class Report {
     private  String caption;
     private String date;
     private String imageURL;
-    private String videoURL;
     private String location;
 
-    public Report(String caption, String date, ReportCategory category, String imageURL,
-                  String videoURL, String location) {
+    public Report(String caption, String date, ReportCategory category, String imageURL, String location) {
         this.date = date;
         this.category = category;
         this.caption = caption;
         this.imageURL = imageURL;
-        this.videoURL = videoURL;
         this.location = location;
     }
     /****************************SETTER METHODS***********************************/
@@ -36,10 +33,6 @@ public class Report {
 
     public void setImageURL(String imageURL) {
         this.imageURL = imageURL;
-    }
-
-    public void setVideoURL(String videoURL) {
-        this.videoURL = videoURL;
     }
 
     public void setLocation(String location) {
@@ -61,10 +54,6 @@ public class Report {
 
     public String getImageURL() {
         return imageURL;
-    }
-
-    public String getVideoURL() {
-        return videoURL;
     }
 
     public String getLocation() {

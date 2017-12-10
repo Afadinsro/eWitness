@@ -1,6 +1,7 @@
 package com.adino.ewitness;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,6 +32,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
@@ -81,8 +87,11 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
      * Firebase variables
      */
     private FirebaseStorage mFirebaseStorage;
+    private ChildEventListener childEventListener;
     private StorageReference mPhotosStorageReference;
     private UploadTask uploadTask;
+    private FirebaseDatabase firebaseDatabase;
+    private DatabaseReference messagesDatabaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +101,7 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
         setSupportActionBar(toolbar);
 
         getLocationPermission();
+
 
         tbtnAuto = (ToggleButton)findViewById(R.id.tbtn_category_auto);
         tbtnTheft = (ToggleButton)findViewById(R.id.tbtn_category_theft);
@@ -104,6 +114,10 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
 
         mFirebaseStorage = FirebaseStorage.getInstance();
         mPhotosStorageReference = mFirebaseStorage.getReference().child("photos");
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        messagesDatabaseReference = firebaseDatabase.getReference().child("reports");
+        //attach child event listener
+        attachDatabaseReadListener();
 
 
         ImageView imageView = (ImageView) findViewById(R.id.image_view_report_image);
@@ -139,16 +153,9 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
-
                 Log.d(TAG, "onClick: Submit button clicked");
-                category = getSelectedCategory(selectedTbtn);
-                date = getCurrentDate();
-                caption = getCaption();
-
                 uploadImage();
-                //Report report = new Report(caption, date, category, imageURL, videoURL, location);
+
             }
         });
 
@@ -161,10 +168,6 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
         attachToggleStateListeners();
         //Set Automobile by default
         tbtnAuto.setChecked(true);
-
-
-
-
     }
 
     /**
@@ -244,6 +247,11 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
 
     }
 
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH).format(new Date());
@@ -260,6 +268,9 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
         return image;
     }
 
+    /**
+     *
+     */
     private void uploadImage(){
         try {
             File imageFile = createImageFile();
@@ -279,9 +290,15 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Snackbar.make(btnSubmit, "Image uploaded successfully", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                imageURL = downloadUrl.toString();
+
+                category = getSelectedCategory(selectedTbtn);
+                date = getCurrentDate();
+                caption = getCaption();
+                Report report = new Report(caption, date, category, imageURL, location);
+
+                messagesDatabaseReference.push().setValue(report);
 
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -320,6 +337,9 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
 
     }
 
+    /**
+     *
+     */
     private void attachToggleStateListeners(){
         tbtnAuto.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -378,6 +398,11 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
         });
     }
 
+    /**
+     *
+     * @param selectedTbtn
+     * @return
+     */
     private ReportCategory getSelectedCategory(ToggleButton selectedTbtn){
         ReportCategory reportCategory = null;
         if(selectedTbtn != null){
@@ -396,17 +421,76 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
         return reportCategory;
     }
 
+    /**
+     *
+     * @return
+     */
     private String getCurrentDate(){
         Calendar c = Calendar.getInstance();
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
         return df.format(c.getTime());
     }
 
+    /**
+     *
+     * @return
+     */
     private String getCaption(){
         return txtCaption.getText().toString();
     }
 
+    /**
+     *
+     * @return
+     */
     private String getLocation(){
         return "";
+    }
+
+    /**
+     *
+     */
+    private void attachDatabaseReadListener(){
+        if(childEventListener == null) {
+            childEventListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    //FriendlyMessage friendlyMessage = dataSnapshot.getValue(FriendlyMessage.class);
+                    //mMessageAdapter.add(friendlyMessage);
+                    //go back to home page if report is submitted successfully
+                    Snackbar.make(btnSubmit, "Report submitted successfully!", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    Intent home = new Intent(ReportDetailsActivity.this, MainActivity.class);
+                    startActivity(home);
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                }
+            };
+            messagesDatabaseReference.addChildEventListener(childEventListener);
+        }
+    }
+
+    /**
+     *
+     */
+    private void removeDatabaseReadListener(){
+        if(childEventListener != null) {
+            messagesDatabaseReference.removeEventListener(childEventListener);
+            childEventListener = null;
+        }
     }
 }
