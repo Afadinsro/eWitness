@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -21,30 +22,51 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, ActivityCompat.OnRequestPermissionsResultCallback{
 
-    private ViewPager viewPager;
-    private ViewPagerAdapter viewPagerAdapter;
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private ViewPager mViewPager;
+    private ViewPagerAdapter mViewPagerAdapter;
+    private static final int REQUEST_IMAGE_CAPTURE = 222;
     private static final String TAG = "MainActivity";
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int ERROR_DIALOG_REQUEST = 9001;
+    public static final int RC_SIGN_IN = 111;
+
+    /**
+     * Firebase variables
+     */
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseAuth.AuthStateListener mAuthStateListener;
+    private FirebaseUser mFirebaseUser;
+
+    /**
+     * User Information Variables
+     */
+    private String mUsername;
+    private String mUserPhoneNumber;
+    private String mUserEmail;
+
+    public static final String ANONYMOUS = "Anonymous";
 
     //vars
     private boolean mLocationPermissionsGranted = false;
+    private boolean loggegIn = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +74,32 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         if(isGoogleServicesOK()) {
-            init();
+            mFirebaseAuth = FirebaseAuth.getInstance();
+            mUsername = ANONYMOUS;
+            /**
+             * Check if User is signed in
+             * If the user is not signed in, direct user to sign in page.
+             */
+            initializeAuthStateListener();
         }
 
 
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mAuthStateListener != null) {
+            mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+        init();
     }
 
     @Override
@@ -87,7 +131,8 @@ public class MainActivity extends AppCompatActivity
             return true;
         }else
         if (id == R.id.action_sign_out) {
-
+            AuthUI.getInstance().signOut(MainActivity.this);
+            finish();
             return true;
         }
 
@@ -112,7 +157,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,@NonNull int[] grantResults) {
         switch (requestCode){
             case LOCATION_PERMISSION_REQUEST_CODE:
                 if(grantResults.length > 0){
@@ -129,18 +174,30 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-            byte[] byteArray = byteArrayOutputStream.toByteArray();
+        //super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_IMAGE_CAPTURE){
+            if(resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                if (imageBitmap != null) {
+                    imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                }
+                byte[] byteArray = byteArrayOutputStream.toByteArray();
 
-            Intent goToAddDetailsIntent = new Intent(MainActivity.this, ReportDetailsActivity.class);
-            goToAddDetailsIntent.putExtra("image",byteArray);
-            startActivity(goToAddDetailsIntent);
-            //mImageView.setImageBitmap(imageBitmap);
+                Intent goToAddDetailsIntent = new Intent(MainActivity.this, ReportDetailsActivity.class);
+                goToAddDetailsIntent.putExtra("image", byteArray);
+                startActivity(goToAddDetailsIntent);
+            }
+        }
+
+        if(requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(MainActivity.this, "Signed in!", Toast.LENGTH_SHORT).show();
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(MainActivity.this, "Sign in cancelled!", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }
 
     }
@@ -175,9 +232,9 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        viewPager = (ViewPager) findViewById(R.id.vp_image_slider);
-        viewPagerAdapter = new ViewPagerAdapter(this);
-        viewPager.setAdapter(viewPagerAdapter);
+        mViewPager = (ViewPager) findViewById(R.id.vp_image_slider);
+        mViewPagerAdapter = new ViewPagerAdapter(this);
+        mViewPager.setAdapter(mViewPagerAdapter);
 
         // Add timer to image slider
         Timer timer = new Timer();
@@ -187,23 +244,13 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*Intent cameraIntent = new Intent();
-                cameraIntent.setClass(MainActivity.this, CameraActivity.class);
-                startActivity(cameraIntent);*/
                 if(isPermissionGrantedForCamera()) {
                     dispatchCameraIntent();
                 }
             }
         });
 
-        Button btnNext = (Button)findViewById(R.id.btn_go_to_details);
-        btnNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent detailsIntent = new Intent(MainActivity.this, ReportDetailsActivity.class);
-                startActivity(detailsIntent);
-            }
-        });
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -213,6 +260,36 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void initializeAuthStateListener(){
+        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                mFirebaseUser = firebaseAuth.getCurrentUser();
+                if(mFirebaseUser != null){
+                    loggegIn = true;
+                    onSignedInInitialize(mFirebaseUser);
+                }else{
+                    // User is not signed in
+                    onSignedOutCleanup();
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setIsSmartLockEnabled(false)
+                                    .setLogo(R.mipmap.ic_launcher)
+                                    .setAvailableProviders(
+                                            Arrays.asList(
+                                                    new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build(),
+                                                    new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER).build(),
+                                                    new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build()
+                                            )
+                                    ).build(),
+                            RC_SIGN_IN
+                    );
+                }
+            }
+        };
     }
 
     private boolean isGoogleServicesOK(){
@@ -232,6 +309,17 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+    private void onSignedInInitialize(FirebaseUser user){
+        mUsername = user.getDisplayName();
+        mUserPhoneNumber = user.getPhoneNumber();
+        mUserEmail = user.getEmail();
+    }
+
+    private void onSignedOutCleanup(){
+        mUsername = ANONYMOUS;
+        mFirebaseUser = null;
+    }
+
 
     /******************************IMAGE SLIDER TIMER*************************************/
     /**
@@ -244,10 +332,10 @@ public class MainActivity extends AppCompatActivity
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if(viewPager.getCurrentItem() == 0){
-                        viewPager.setCurrentItem(1, true);
-                    } else if(viewPager.getCurrentItem() == 1){
-                        viewPager.setCurrentItem(0, true);
+                    if(mViewPager.getCurrentItem() == 0){
+                        mViewPager.setCurrentItem(1, true);
+                    } else if(mViewPager.getCurrentItem() == 1){
+                        mViewPager.setCurrentItem(0, true);
                     }
                 }
             });
