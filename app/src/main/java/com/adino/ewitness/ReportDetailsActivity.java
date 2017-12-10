@@ -94,13 +94,13 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
         getLocationPermission();
 
         tbtnAuto = (ToggleButton)findViewById(R.id.tbtn_category_auto);
-        //Set Automobile by default
-        tbtnAuto.setChecked(true);
         tbtnTheft = (ToggleButton)findViewById(R.id.tbtn_category_theft);
         tbtnSanitation = (ToggleButton)findViewById(R.id.tbtn_category_sanitation);
         tbtnSocial = (ToggleButton)findViewById(R.id.tbtn_category_social);
         tbtnEducation = (ToggleButton)findViewById(R.id.tbtn_category_education);
         txtCaption = (EditText)findViewById(R.id.txtCaption);
+        btnSubmit = (Button) findViewById(R.id.btn_submit_report);
+        btnSubmit.setEnabled(false);
 
         mFirebaseStorage = FirebaseStorage.getInstance();
         mPhotosStorageReference = mFirebaseStorage.getReference().child("photos");
@@ -113,11 +113,12 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
         imageView.setImageBitmap(imageBitmap);
 
 
-        btnSubmit = (Button) findViewById(R.id.btn_submit_report);
+
         // Enable Send button when there's text to send
         txtCaption.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                btnSubmit.setEnabled(false);
             }
 
             @Override
@@ -158,7 +159,8 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
     protected void onStart() {
         super.onStart();
         attachToggleStateListeners();
-
+        //Set Automobile by default
+        tbtnAuto.setChecked(true);
 
 
 
