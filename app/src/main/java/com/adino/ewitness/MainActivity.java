@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -21,7 +22,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity
 
     private ViewPager mViewPager;
     private ViewPagerAdapter mViewPagerAdapter;
+    private Timer timer;
     private static final int REQUEST_IMAGE_CAPTURE = 222;
     private static final String TAG = "MainActivity";
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -67,6 +71,7 @@ public class MainActivity extends AppCompatActivity
     //vars
     private boolean mLocationPermissionsGranted = false;
     private boolean loggegIn = false;
+    private boolean touched = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,9 +151,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            // Handle the camera action
+
         } else if (id == R.id.nav_reports) {
 
+        } else if (id == R.id.nav_logout) {
+            AuthUI.getInstance().signOut(MainActivity.this);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -202,6 +209,20 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_SCROLL:
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_MOVE:
+                timer.cancel();
+                break;
+        }
+
+        return super.onTouchEvent(event);
+    }
+
     /*******************************PERSONAL METHODS****************************************/
 
     private void dispatchCameraIntent(){
@@ -237,8 +258,9 @@ public class MainActivity extends AppCompatActivity
         mViewPager.setAdapter(mViewPagerAdapter);
 
         // Add timer to image slider
-        Timer timer = new Timer();
+        timer = new Timer();
         timer.scheduleAtFixedRate(new ImageSliderTimer(), 2000, 6000);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -297,7 +319,7 @@ public class MainActivity extends AppCompatActivity
         int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
         if(available == ConnectionResult.SUCCESS){
             Log.d(TAG, "isGoogleServicesOK: Google Play services is OK");
-            Toast.makeText(this, "Google Play services is OK", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Google Play services is OK", Toast.LENGTH_SHORT).show();
             return true;
         }else if(GoogleApiAvailability.getInstance().isUserResolvableError(available)){
             Log.d(TAG, "isGoogleServicesOK: An error occured but we can fix it");
@@ -309,12 +331,23 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+    /**
+     *
+     * @param user Authenticated user
+     */
     private void onSignedInInitialize(FirebaseUser user){
         mUsername = user.getDisplayName();
+        TextView username = (TextView)findViewById(R.id.nav_name);
         mUserPhoneNumber = user.getPhoneNumber();
         mUserEmail = user.getEmail();
+        TextView email = (TextView)findViewById(R.id.nav_email);
+        Uri profilePic = user.getPhotoUrl();
+
     }
 
+    /**
+     *
+     */
     private void onSignedOutCleanup(){
         mUsername = ANONYMOUS;
         mFirebaseUser = null;
@@ -332,10 +365,14 @@ public class MainActivity extends AppCompatActivity
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if(mViewPager.getCurrentItem() == 0){
-                        mViewPager.setCurrentItem(1, true);
-                    } else if(mViewPager.getCurrentItem() == 1){
-                        mViewPager.setCurrentItem(0, true);
+                    if(!touched){
+                        if(mViewPager.getCurrentItem() == 0){
+                            mViewPager.setCurrentItem(1, true);
+                        } else if(mViewPager.getCurrentItem() == 1){
+                            mViewPager.setCurrentItem(2, true);
+                        } else if(mViewPager.getCurrentItem() == 2){
+                            mViewPager.setCurrentItem(0, true);
+                        }
                     }
                 }
             });

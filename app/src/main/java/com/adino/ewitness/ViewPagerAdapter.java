@@ -15,7 +15,7 @@ import android.widget.ImageView;
 public class ViewPagerAdapter extends PagerAdapter {
     private Context context;
     private LayoutInflater layoutInflater;
-    private Integer[] images = {R.mipmap.ic_daddy, R.mipmap.ic_launcher};
+    private Integer[] images = {R.mipmap.ic_clean_ghana_foreground, R.mipmap.ic_educational_system_foreground, R.mipmap.ic_police_service_foreground};
 
     public ViewPagerAdapter(Context context){
         this.context = context;

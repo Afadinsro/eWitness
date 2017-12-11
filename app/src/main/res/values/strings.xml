@@ -9,6 +9,7 @@
     <!-- Side Nav Menus -->
     <string name="nav_home">Home</string>
     <string name="nav_reports">Reports</string>
+    <string name="nav_logout">Sign Out</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_messages">Messages</string>
 

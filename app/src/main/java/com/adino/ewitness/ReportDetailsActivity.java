@@ -299,12 +299,14 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
                 Report report = new Report(caption, date, category, imageURL, location);
 
                 messagesDatabaseReference.push().setValue(report);
+                Intent home = new Intent(ReportDetailsActivity.this, MainActivity.class);
+                startActivity(home);
 
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Snackbar.make(btnSubmit, "Image uploaded successfully", Snackbar.LENGTH_LONG)
+                Snackbar.make(btnSubmit, "Image uploaded failed", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
@@ -458,14 +460,12 @@ public class ReportDetailsActivity extends AppCompatActivity implements OnMapRea
                     //FriendlyMessage friendlyMessage = dataSnapshot.getValue(FriendlyMessage.class);
                     //mMessageAdapter.add(friendlyMessage);
                     //go back to home page if report is submitted successfully
-                    Snackbar.make(btnSubmit, "Report submitted successfully!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    Intent home = new Intent(ReportDetailsActivity.this, MainActivity.class);
-                    startActivity(home);
+
                 }
 
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
                 }
 
                 @Override

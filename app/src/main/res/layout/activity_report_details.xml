@@ -41,6 +41,7 @@
         style="@android:style/Widget.Material.Light.Button"
         android:layout_width="@dimen/btn_submit_report_width"
         android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
         android:text="@string/btn_submit_report"
         app:layout_anchor="@+id/include"
         app:layout_anchorGravity="bottom|center" />
